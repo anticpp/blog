@@ -3,16 +3,16 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Hexo
-subtitle:
-description:
-author: John Doe
+title: 龟舍
+subtitle: 若即若离
+description: 谈人生谈理想，还是谈钱吧。
+author: supergui@live.cn
 language:
 timezone:
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: http://yoursite.com
+url: http://anticpp.github.io
 root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults:
