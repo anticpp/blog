@@ -5,11 +5,11 @@ tags:
     - 技术
 ---
 
-自动ssh登录，我写了一个autossh的工具。
-有兴趣的朋友可以试试[autossh](https://github.com/anticpp/autossh)
+> 自动ssh登录，我写了一个autossh的工具。
+> 有兴趣的朋友可以试试[autossh](https://github.com/anticpp/autossh)
 
-回到正题，A要ssh登陆到B，不想输入密码。可以在B建立一个对A的ssh信任关系即可。
-ssh的信任关系是通过rsa实现，具体的操作步骤如下:
+> 回到正题，A要ssh登陆到B，不想输入密码。可以在B建立一个对A的ssh信任关系即可。
+> ssh的信任关系是通过rsa实现，具体的操作步骤如下:
 
 ## A机器生成rsa key
   - 进入~/.ssh/

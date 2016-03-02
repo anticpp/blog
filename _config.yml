@@ -7,7 +7,7 @@ title: 龟舍
 subtitle: 斯室陋室
 description: 谈人生谈理想，还是谈钱吧。
 author: supergui@live.cn
-language:
+language: en
 timezone:
 
 # URL
@@ -26,6 +26,9 @@ category_dir: categories
 code_dir: downloads/code
 i18n_dir: :lang
 skip_render:
+
+# Archive
+tag: 2
 
 # Writing
 new_post_name: :title.md # File name of new posts
@@ -63,7 +66,8 @@ pagination_dir: page
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: light
+theme: next
+#theme: landscape
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
