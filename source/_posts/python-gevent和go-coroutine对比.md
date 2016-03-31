@@ -36,4 +36,4 @@ tags:
 * 总的来说不管是python-gevent还是go-coroutine，在用户态进行的context调度，比内核的threading消耗小很多
 
 ## 测试代码
-[->大力点击链接<-](/bench-code)
+[github代码](https://github.com/anticpp/coroutine_benchmark)
