@@ -2,6 +2,8 @@
 title: ffmpeg
 date: 2016-03-31 21:05:06
 tags:
+    - 技术
+    - 视频
 ---
 
 ffmpeg使用
