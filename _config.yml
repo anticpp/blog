@@ -3,9 +3,9 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: 龟舍
-subtitle: 斯室陋室
-description: 谈人生谈理想，还是谈钱吧。
+title: 超级龟
+subtitle: 超级图形用户界面
+description: 心为菩提树，身为明镜台。日日勤拂拭，勿使惹尘埃。
 author: supergui@live.cn
 language: en
 timezone:
@@ -66,8 +66,8 @@ pagination_dir: page
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: next
-#theme: landscape
+#theme: next
+theme: landscape
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
