@@ -1,8 +1,10 @@
-# Simply Install
+# Prepare
 
 ```
 git clone git@github.com:anticpp/hexosource.git Blog
 cd Blog
+git submodule init
+git submodule update
 npm install
-git clone https://github.com/hexojs/hexo-theme-landscape.git themes/landscape # refer to 'theme' in _config.xml.
+
 ```
