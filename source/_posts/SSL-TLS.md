@@ -50,8 +50,8 @@ ssl/tls的握手过程，往往容易忽略证书校验的过程，这个发生�
 
 ![certification_flow](/images/tls_certification.png)
 
-1. CA本身有自己的一套根私钥(cakey.pem)、根证书(cacert.pem一般包含了证书信息、对应的公钥信息等)
-2. Server先自己生产私钥(server_key.pem)和证书签名请求CSR(server_csr.pem)
+1. CA本身有自己的一套根密钥(cakey.pem)、根证书(cacert.pem一般包含了证书信息、对应的公钥信息等)
+2. Server生成自己的密钥(server_key.pem)和证书签名请求CSR(server_csr.pem)
 3. Server拿server_csr.pem到CA进行签名，得到server_crt.pem，即最终的证书。CA签名的过程，可以简单理解为用cakey.pem对server_csr.pem增加一段加密的签名信息。这段签名信息，只有CA的公钥（公钥信息在cacert.pem可以得到）可以解开。
 ```
 F(cakey.pem, server_csr.pem) = server_crt.pem
@@ -81,7 +81,7 @@ CA的权威性，是建立在行业标准之上的存在，所以对浏览器厂
 Openssl工具提供了一整套完整的命令行工具，大概流程如下
 主要做几件事情
 1. 配置自己的CA
-2. 生成Server的私钥，CSR
+2. 生成Server的密钥，CSR
 3. 用CSR到CA签名，生成CRT，也就是证书
 
 
@@ -118,13 +118,13 @@ openssl req -new -x509 -key private/cakey.pem -out cacert.pem
 
 ## 6.2 配置Server
 
-- 生成Server私钥
+- 生成Server密钥
 ```
 openssl genrsa -out server_key.pem 2048
 ```
 
 - 生成Server CSR
-需要用到秘钥
+需要用到密钥
 ```
 openssl req -new -key server_key.pem -out server_csr.pem
 ...
@@ -150,7 +150,7 @@ openssl ca -in server_csr.pem -out server_crt.pem
 ```
 
 ## 6.4 完成
-Server端持有: 私钥server_key.pem、证书server_crt.pem
+Server端持有: 密钥server_key.pem、证书server_crt.pem
 Client端持有: CA的根证书cacert.pem
 
 双方即可进行ssl/tls握手通信
@@ -162,11 +162,11 @@ Client端持有: CA的根证书cacert.pem
 握手过程如下，加粗的步骤是新增的。
 - Client端发送ClientHello给Server端。包含协议版本、一个随机数(Random1)、支持的加密算法、压缩算法等。
 - Server端发送ServerHello给Client端。包含协议版本的确认、一个随机数(Random2)、确认的加密算法、压缩算法等。
-- ****Server端发送Certificate(证书)给Client端。****
-- Server端发送Certificate Request给Client端，要求Client端提供证书。
+- Server端发送Certificate(证书)给Client端。
+- ****Server端发送Certificate Request给Client端，要求Client端提供证书。****
 - Server端发送ServerHelloDone给Client端。
 - ****Client端发送Certificate给Server端。****
 - Client端发送ClientKeyExchange给Server端。包含随机数PreMasterSecret，并且PreMasterSecret要用证书的公钥进行加密。
 - Client和Server端用Random1、Random2、PreMasterSecret算出来MasterSecret，这个MasterSecret就是双方约定的加密传输的对称秘钥，并且使用之前协商的加密算法，进行后续的数据交互。
 
-服务器拿到Client端的证书，进行类似Client端的证书校验过程，这样就实现了双向校验。
+服务器拿到Client端的Certificate，进行类似Client端对Server端的Certificate校验过程，这样就实现了双向校验。
