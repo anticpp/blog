@@ -22,14 +22,14 @@ ssl/tls是一套基于非对称加密的安全协议，实际上ssl和tls是两�
 握手的过程大概如下
 - Client端发送ClientHello给Server端。包含协议版本、一个随机数(Random1)、支持的加密算法、压缩算法等。
 - Server端发送ServerHello给Client端。包含协议版本的确认、一个随机数(Random2)、确认的加密算法、压缩算法等。
-- Server端发送Certification(证书)给Client端。
+- Server端发送Certificate(证书)给Client端。
 - Server端发送ServerHelloDone给Client端。
 - Client端发送ClientKeyExchange给Server端。包含一个随机数PreMasterSecret，并且PreMasterSecret要用证书里面的公钥进行加密。
 - Server端用自己的私钥把PreMasterSecret解开。Client和Server都用Random1、Random2、PreMasterSecret算出来MasterSecret，这个MasterSecret就是双方约定的加密传输的对称秘钥，并且使用之前协商的加密算法，进行后续的数据交互。
 
     注意：
-    1. Server端所持有的私钥和公钥（在Certification里面），并没有参与Certification校验的过程，只是用来做最后一个随机数PreMasterSecret的加密保障。
-    2. 这个过程并没有描述Certification在Client端是怎么验证的，也就是Client根据什么确认Server的签名信息。
+    1. Server端所持有的私钥和公钥（在Certificate里面），并没有参与Certificate校验的过程，只是用来做最后一个随机数PreMasterSecret的加密保障。
+    2. 这个过程并没有描述Certificate在Client端是怎么验证的，也就是Client根据什么确认Server的签名信息。
 
 # 4. ssl/tls加密传输
 加密传输是https的最重要特性，保证了所有网络上的数据不会被明文探测。整个握手过程实际上是明文的，生成MasterSecret的前面两个随机数也是明文。实际最终保证安全性的关键在于，PreMasterSecret这个随机数的安全性。而这个随机数的安全性是建立在非对称加密的安全性上面。
@@ -45,19 +45,18 @@ ssl/tls的握手过程，往往容易忽略证书校验的过程，这个发生�
 握手的过程很简单，Server端的一组非对称秘钥，并没有参与到任何证书校验的环节，只是用来做了最后一个随机数PreMasterSecret的安全保障。
 
 实际上我们Server的一对秘钥，并不是用来做证书校验，证书校验是通过另外一组非对称秘钥来保证。
-实际上证书的校验，是通过CA的签名来保证的。
-这里就要提到***CA(Certification Authority)***，CA是一个权威机构，主要负责证书的签名、发放、校验等职责。
+这里就要提到***[CA(Certificate Authority)](https://en.wikipedia.org/wiki/Certificate_authority)***，CA是一个权威机构，主要负责证书的签名、发放、校验等职责。
 主要逻辑参考这个图
 
 ![certification_flow](/images/tls_certification.png)
 
 1. CA本身有自己的一套根私钥(cakey.pem)、根证书(cacert.pem一般包含了证书信息、对应的公钥信息等)
-2. Server先自己生产私钥(server_key.pem)和证书(server_cert.pem)
-3. Server拿server_cert.pem到CA进行签名，得到server_cert_singned.pem。CA签名的过程，可以简单理解为用cakey.pem对server_cert.pem增加一段加密的签名信息。这段签名信息，只有CA的公钥（公钥信息在cacert.pem可以得到）可以解开。
+2. Server先自己生产私钥(server_key.pem)和证书签名请求CSR(server_csr.pem)
+3. Server拿server_csr.pem到CA进行签名，得到server_crt.pem，即最终的证书。CA签名的过程，可以简单理解为用cakey.pem对server_csr.pem增加一段加密的签名信息。这段签名信息，只有CA的公钥（公钥信息在cacert.pem可以得到）可以解开。
 ```
-F(server_cert.pem, cakey.pem) = server_cert_signed.pem
+F(cakey.pem, server_csr.pem) = server_crt.pem
 ```
-4. Client端（一般是浏览器）会内置了CA的根证书(cacert.pem)。在ssl/tls握手的第3步，Client拿到Server的Certification（这个其实就是server_cert_signed.pem），就可以根据CA的根证书对Certification进行验证。
+4. Client端（一般是浏览器）会内置了CA的根证书(cacert.pem)。在ssl/tls握手的第3步，Client拿到Server的Certificate（这个其实就是server_crt.pem），就可以根据CA的根证书对Certificate进行验证。
 
 所以，最终证书的安全性建立在Client端的CA根证书的安全性。
 
@@ -82,8 +81,14 @@ CA的权威性，是建立在行业标准之上的存在，所以对浏览器厂
 Openssl工具提供了一整套完整的命令行工具，大概流程如下
 主要做几件事情
 1. 配置自己的CA
-2. 生成Server的私钥、证书
-3. 签名
+2. 生成Server的私钥，CSR
+3. 用CSR到CA签名，生成CRT，也就是证书
+
+
+
+    CSR: Certificate Signing Request，证书签名请求
+    CRT: Certificate，证书
+
 
 ## 6.1 配置CA
 如果安装了Openssl，默认的路径在/etc/pki/。
@@ -102,26 +107,26 @@ echo 01 > serial
 
 - 创建根密钥
 ```
-openssl genrsa -out private/ca_private_key.pem 2048
+openssl genrsa -out private/cakey.pem 2048
 ```
 
 - 创建根证书
 需要用到密钥 
 ```
-openssl req -new -x509 -key private/ca_private_key.pem -out ca_cert.pem
+openssl req -new -x509 -key private/cakey.pem -out cacert.pem
 ```
 
-## 6.2 生成Server证书
+## 6.2 配置Server
 
-- 生成Server密钥
+- 生成Server私钥
 ```
-openssl genrsa -out server_private_key.pem 2048
+openssl genrsa -out server_key.pem 2048
 ```
 
-- 生成Server证书
+- 生成Server CSR
 需要用到秘钥
 ```
-openssl req -new -key server_private_key.pem -out server_csr.pem
+openssl req -new -key server_key.pem -out server_csr.pem
 ...
 Country Name (2 letter code) [AU]:CN
 State or Province Name (full name) [Some-State]:GD
@@ -138,15 +143,16 @@ An optional company name []:
 ...
 ```
 
-## 6.3 CA对Server证书进行签名
+## 6.3 证书签名
 把上一步的server_csr.pem发给CA机器，在CA机器上执行
 ```
-openssl ca -in server_csr.pem -out server_cert.pem
+openssl ca -in server_csr.pem -out server_crt.pem
 ```
 
 ## 6.4 完成
-Server端拿到秘钥server_private_key.pem、证书server_cert.pem
-Client端拿到CA提供的根证书ca_cert.pem
+Server端持有: 私钥server_key.pem、证书server_crt.pem
+Client端持有: CA的根证书cacert.pem
+
 双方即可进行ssl/tls握手通信
 
 # 7. ssl/tls双向校验
@@ -156,10 +162,10 @@ Client端拿到CA提供的根证书ca_cert.pem
 握手过程如下，加粗的步骤是新增的。
 - Client端发送ClientHello给Server端。包含协议版本、一个随机数(Random1)、支持的加密算法、压缩算法等。
 - Server端发送ServerHello给Client端。包含协议版本的确认、一个随机数(Random2)、确认的加密算法、压缩算法等。
-- ****Server端发送Certification(证书)给Client端。****
-- Server端发送Certification Request给Client端，要求Client端提供证书。
+- ****Server端发送Certificate(证书)给Client端。****
+- Server端发送Certificate Request给Client端，要求Client端提供证书。
 - Server端发送ServerHelloDone给Client端。
-- ****Client端发送Certification给Server端。****
+- ****Client端发送Certificate给Server端。****
 - Client端发送ClientKeyExchange给Server端。包含随机数PreMasterSecret，并且PreMasterSecret要用证书的公钥进行加密。
 - Client和Server端用Random1、Random2、PreMasterSecret算出来MasterSecret，这个MasterSecret就是双方约定的加密传输的对称秘钥，并且使用之前协商的加密算法，进行后续的数据交互。
 
