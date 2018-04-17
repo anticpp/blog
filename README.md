@@ -4,15 +4,10 @@
 - [npm](https://www.npmjs.com/)
 - [hexo](https://hexo.io/)
 
-## Clone
-
-```
-git clone https://github.com/anticpp/blog.git
-```
-
 ## Install
 
 ```
+git clone https://github.com/anticpp/blog.git
 cd blog
 sh install.sh
 ```
