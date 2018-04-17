@@ -1,10 +1,24 @@
-# Prepare
+
+## Requirements
+
+- [npm](https://www.npmjs.com/)
+- [hexo](https://hexo.io/)
+
+## Clone
 
 ```
-git clone git@github.com:anticpp/hexosource.git Blog
-cd Blog
-git submodule init
-git submodule update
-npm install
+git clone https://github.com/anticpp/blog.git
+```
 
+## Install
+
+```
+cd blog
+sh install.sh
+```
+
+## Run HTTP
+
+```
+hexo server
 ```
