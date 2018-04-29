@@ -9,7 +9,7 @@
 ```
 git clone https://github.com/anticpp/blog.git
 cd blog
-sh install.sh
+sh install
 ```
 
 ## Run HTTP
