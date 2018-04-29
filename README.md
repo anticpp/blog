@@ -15,5 +15,5 @@ sh install
 ## Run
 
 ```
-sh watch-and-serve
+sh serve
 ```
