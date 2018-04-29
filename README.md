@@ -12,8 +12,8 @@ cd blog
 sh install
 ```
 
-## Run HTTP
+## Run
 
 ```
-hexo server
+sh watch-and-serve
 ```
