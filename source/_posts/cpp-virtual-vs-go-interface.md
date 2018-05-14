@@ -37,6 +37,55 @@ p->func(); ```
 Hello D
 ```
 
+## C++ vtable
+
+C++通过vtable实现多态，C++在***编译期***给每个类生成一个vtable。vtable就是一个函数地址数组，记录了这个类所有的virtual function指向的函数地址。只要该类声明了function为virtual，或者它的父类/祖先类声明了virtual，则该function就是virtual。
+
+例如，`class D`的vtable只包涵一个元素，就是`func`的地址。
+
+```
+
+class D : vtable --> -----------
+                     | D::func |
+                     -----------
+                     |  null   |(null for array end)
+                     -----------
+
+
+```
+
+这里需要注意，`class D`的`func`没有指向`Base::func`，而是指向了`D::func`，是由于`class D`重新实现了`virtual func`。如果`class D`没有实现`virtual func`，那么`class D`的`func`会指向`Base::func`。
+
+```
+
+class D : vtable --> --------------
+                     | Base::func |
+                     --------------
+                     |  null      |(null for array end)
+                     --------------
+
+
+```
+
+那么，vtable是怎么使用的呢。在我们创建对象的时候，编译器会在创建对象的内存的开始插入vtable的地址指针vptr(很tricky)。例如，我们`new D()`
+
+```
+                                           vtable
+p = new D() -----> ------------          -----------
+                   |  vptr    | -------->| D::func |
+                   ------------          -----------
+                   |          |          |  null   |
+                   | D object |          -----------
+                   |          |
+                   ------------
+```
+
+> 所以即使是一个空的class，如果有virtual function，那么该class的sizeof也不会是0，而是一个指针的大小(sizeof(void *))。
+
+当我们通过该对象调用`func`的时候，因为该function为virtual，会通过`vptr`找到`vtable`，并且在`vtable`里面找到`func`的地址，并且执行。
+
+C++通过vtable实现了运行期的多态，但是vtable是在编译器静态绑定，运行期需要进行vtable的查找。
+
 
 ## Go interface
 Go的interface是Go语言一个很重要的设计，借鉴了Java和C++的部分语言特性，最大的改变是去掉了C++和Java里面的显示继承。interface只是单纯的定义分行为（方法），如果我们要定义一种类型属于该interface，并不需要显示的继承该interface，只需要对该类型实现所有interface所声明的方法，那么这个类型就是属于该interface。
@@ -52,7 +101,7 @@ type Base interface {
 
 type D struct {}
 
-func (d \*D) func() {
+func (d *D) func() {
     fmt.Println("Hello D")
 }
 
@@ -67,3 +116,44 @@ p.func()
 Hello D
 ```
 
+
+## Go itable
+
+Go的interface结构包含2部分，第一部分是指向实际对象的value，第二部分是一个地址数组`itable`（有点像C++的vtable）。例如`interface Base`的结构如下
+
+```
+
+Base -->  -------------
+          |   value   |
+          -------------         ---------
+          |  itable   | ----->  |  func |
+          -------------         ---------
+                                |  null |
+                                ---------
+```
+
+
+当我们执行`var p Base = new(D)`时，会把左值拷贝给value，并且通过查找`D`的函数列表组装`itable`。
+
+```
+
+Base -->  -------------                                        -------------------
+          |   value   |------------------------------------->  | address of D()  |
+          -------------         ---------                      -------------------
+          |  itable   | ----->  |  func |---------------
+          -------------         ---------              |            -------------
+                                |  null |              |----------> | D::func() |
+                                ---------                           -------------
+
+```
+
+所以，当我们执行`p->func()`时，编译器已经知道具体执行的是`D::func()`
+
+
+## 总结
+
+C++和Go interface内部实现机制并不一样，但是都可以实现运行期的多态绑定。就是说，我们可以根据运行期实际创建的对象是什么，来决定运行的函数。
+
+C++通过编译器静态产生vtable的方式实现，但是需要在运行期进行vtable查找，会带来运行期开销。
+
+Go interface在运行期计算itable，好处是在执行的时候基本上是O(1)开销。
