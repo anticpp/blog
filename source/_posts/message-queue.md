@@ -1,7 +1,8 @@
 ---
-title: message-queue
+title: Message queue
 date: 2021-03-04 10:15:47
-tags:
+tags: 
+    - mq
 ---
 
 

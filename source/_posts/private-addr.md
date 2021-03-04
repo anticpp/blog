@@ -1,7 +1,9 @@
 ---
-title: IPV4私有地址
+title: IPv4 private address
 date: 2018-05-03 14:22:20
-tags: IP
+tags: 
+    - IP 
+    - network
 ---
 
 ## 私有地址

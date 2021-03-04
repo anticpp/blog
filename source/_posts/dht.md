@@ -1,10 +1,13 @@
 ---
 title: DHT
 date: 2018-04-17 21:03:24
-tags: p2p dht
+tags: 
+    - p2p 
+    - dht
 ---
 
 ## 1. 背景
+
 BT作为历史上最成功的P2P文件系统，已经在全球实现了彻底的去中心化。BT的P2P网络，不依赖任何机构或者中心依然能够很好的运行。
 这里面，最关键的设计是引入了DHT。这里我们主要介绍一下为什么要引入DHT，以及DHT的基本原理。
 
@@ -61,6 +64,7 @@ Tracker提供了一种简单高效的方案，解决了资源索引的问题。�
 考虑没有中心化的Tracker，我们需要一个去中心化的方式，把资源的索引存储(sharding)到全网的节点，并且能高效的查询。
 
 ### 3.1 全量
+
 最简单的办法，就是让每一个Node(节点)都维护一个全量的索引，相当于每个Node都是一个Tracker节点。
 
 > 注意：我们需要区分一下Node和Peer的概念，以下是DHT的papper的描述
@@ -88,6 +92,7 @@ Tracker提供了一种简单高效的方案，解决了资源索引的问题。�
 2. 海量的索引，每个单点都需要全量存储，代价太大
 
 ### 3.2 Sharding
+
 基本的思路是，我们需要把索引数据按照***一定规则***分布(sharding)到全网的节点。
 
 
@@ -125,6 +130,7 @@ if i < hash(resource) < j {
 我们需要彻底解决状态数据的问题，才能真正实现去中心化。
 
 ## 4. DHT
+
 DHT(Distributed Hash Table)，就是分布式Hash table。实际上也是Sharding的一种实现方法，DHT可以看作是一致性Hash的基础上的改进。一致性Hash算法的问题是Hash环的状态数据，只要我们能设计出一种关于索引分布规则的去中心化的***共识机制***，我们并不需要去维护一个Hash环。关于DHT的比较完整的介绍，可以参考[DHT Protocol](http://www.bittorrent.org/beps/bep_0005.html)。
 
 DHT设计了这样一种去中心化的***共识机制***：索引信息应该存储到到距离目标***更近***的节点。
@@ -138,6 +144,7 @@ DHT网络中每个节点的NodeID就是一个hash值，每个资源也有一个h
 用来计算2个hash的距离，Node和Node之间可以有距离，Node和资源之间也可以有距离。要注意的是，这个距离并不是实际意义上的距离，只是一个算法上的需要。
 
 ### 4.3 Routing table
+
 DHT网络中每个Node都维护一个Routing table（路由表），这是DHT的核心部分，它保存本节点和网络中一小部分节点信息。每一个节点，都能够提供查询接口，并且能够返回距离目标hash***更近***的节点。这样通过网络中递归查询Routihng table，可以不断的趋向***更近***。IPFS把这个过程总结为[Peer Routing](https://github.com/libp2p/specs/blob/master/4-architecture.md#41-peer-routing)的过程。我们可以用Peer routing解决DHT的***共识机制***。
 
 ```
@@ -172,6 +179,7 @@ client  -------------------->  |         |
 
 
 ## 5. Kademlia
+
 DHT有很多不同的实现，这里主要介绍Kademlia，一般我们叫KAD。现在大部分的DHT都是基于KAD实现，或者KAD的一些改进。
 KAD使用k-bucket(k桶)实现Routing table，能实现log2(N)的查找效率。假设1000000节点的规模的网络，可以最多20次查询能够完成全网节点的查询。
 

@@ -1,7 +1,9 @@
 ---
-title: gopher-2018
+title: Gopher 2018 shanghai memo
 date: 2018-05-11 23:28:16
-tags:
+tags: 
+    - go
+    - meeting
 ---
 
 记录一下参加gopher 2018的东西
