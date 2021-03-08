@@ -17,21 +17,10 @@ tags:
 
 ## nsq
 
-```
-                                 Consumer Group
-                                   --------
-  topic --        ------------------- C0  |
-         |       \|/               |      |
-         --> channel0 <-------------- C1  |
-         |       /|\               |      |
-         |        ------------------- C2  |
-         --> channel1              |      |
-         |                         --------
-         --> channel2        
-
-```
 
 - 订阅模型
+
+![nsq-topic](/images/nsq-topic.gif)
 
 消费者订阅一个topic需要指定channel，所有订阅同一个topic/channel的消费者实例，构成一个Consumer Group。不同的Consumer Group需要订阅不同的channel。
 
@@ -53,20 +42,10 @@ nsq采取消息推的模型，并且，消费者实例通过通告RDY告知nsq s
 
 ## kafka
 
-```
-  topic --                       Consumer Group
-         |                         ---------
-         --> partition0 <------------- C0  |
-         |                         |       |                          
-         --> partition1 <------------- C1  |
-         |                         |       |
-         --> partition2 <------------- C2  |
-         |                         |   |   |
-         --> partition3 <---------------   |
-                                   ---------
-```
 
 - 订阅模型
+
+![kafka-topic](/images/kafka-topic.png)
 
 每一个消费者需要指定Consumer Group ID，ID相同的消费者实例构成一个Consumer Group。Consumer Group可以对一个topic进行订阅，kafka内部会维护不同的Consumer Group的消费状态(offset)，互相不影响。
 
