@@ -5,8 +5,9 @@ tags:
     - mq
 ---
 
+不同的消息队列中间件对比
 
-对比不同的消息队列中间件的消息语义
+# 消息语义
 
 ## 通行概念解释
 
@@ -64,5 +65,15 @@ kafka通过partion支持topic的多消费者并发。topic进行多个partion，
 - 有序性
 
 kafka保证topic的每一个partition是顺序的，但是多个partion之间的消息不保证有序。
+
+## pulsar
+
+> TODO
+
+# 分布式集群
+
+## nsq
+
+## kafka
 
 ## pulsar
