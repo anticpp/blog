@@ -5,5 +5,5 @@
 	path = themes/next
 	url = https://github.com/iissnan/hexo-theme-next.git
 [submodule ".deploy-git"]
-	path = .deploy-git
+	path = .deploy_git
 	url = git@github.com:anticpp/anticpp.github.io.git
